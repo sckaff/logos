@@ -1,0 +1,19 @@
+- Swarm intelligence? Agents each w/ differennt purposes
+- Think of debbuging whenn creating vizualization
+- Fully-connected network foor each input
+	- "Areas of the brain"
+	- Better than auxiliary networks?
+- How to allow "junk DNA"? (Instead of allowing errors)
+- Create more neurons in saturated areas
+- Reproduce b/w species?
+- Softmax is always used
+- Ability too create new input?
+	- Like creating new organns
+	- Ideally we want to evolve towards that (new input)
+- Encoder = Genotype | Decoder = Phenotype
+- String-matching genes is also more efficient
+- Weight-mutation? Based on gaussian if so
+- When to add a  new layer?
+	- If adding new noe, fully connected
+	- When to change structure and when to change weights
+- "Cap value" to avoid overfitting (?)
