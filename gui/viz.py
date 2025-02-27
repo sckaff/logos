@@ -1,5 +1,4 @@
 from nicegui import ui
-import webview
 
 def start_evolution():
     ui.notify('Evolution started!')
