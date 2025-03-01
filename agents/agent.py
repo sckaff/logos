@@ -1,15 +1,15 @@
-from utils import config
-
-import torch
-import torch.nn as nn
-import torch.optim as optim
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
-import numpy as np
+
+import torch.nn as nn
+import torch
+
+from utils import config
+import inspect
 
 class MNIST_Agent:
-    def __init__(self, environment):
-        config = get_env_config(environment)
+    def __init__(self):
+        config = get_env_config()
 
     # Load MNIST dataset
     transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5,), (0.5,))])
@@ -26,43 +26,23 @@ class MNIST_Agent:
     X_test, y_test = next(iter(test_loader))
     X_test = X_test.view(-1, 28 * 28)
 
-def get_env_config(env):
-    if env == "MNIST":
-        return {"population": config.POPULATION_SIZE, "generations": config.GENERATIONS, "top_k": config.TOP_K, "mutation_rate": config.MUTATION_RATE, "subset_size": config.SUBSET_SIZE}
+def get_env_config():
+    caller_frame = inspect.currentframe().f_back  # Get the caller's frame
+    caller_instance = caller_frame.f_locals.get('self', None)  # Get the caller instance
+    caller_class_name = caller_instance.__class__.__name__ if caller_instance else "Unknown"
+
+    print(f"Called by class: {caller_class_name}")  # Debugging purpose
+
+    if caller_class_name == "MNIST_Agent":
+        return {
+            "population": 100,
+            "generations": 50,
+            "top_k": 10,
+            "mutation_rate": 0.05,
+            "subset_size": 5
+        }
     else:
         return 0
-
-class NeuralNetwork(nn.Module):
-    def __init__(self):
-        super(NeuralNetwork, self).__init__()
-        self.fc1 = nn.Linear(28 * 28, 32)
-        self.fc2 = nn.Linear(32, 10)
-
-    def forward(self, x):
-        x = torch.tanh(self.fc1(x))  # Hidden activation
-        x = self.fc2(x)  # Output logits
-        return x
-
-
-# Evaluation function (accuracy)
-def evaluate(network, X, y):
-    with torch.no_grad():
-        output = network(X)
-        predictions = torch.argmax(output, dim=1)
-        return (predictions == y).float().mean().item()
-
-
-# Mutation function
-def mutate(network, mutation_rate=0.05):
-    child = NeuralNetwork()
-    child.load_state_dict(network.state_dict())  # Copy weights
-    
-    for param in child.parameters():
-        if len(param.shape) > 1:  # Only mutate weights, not biases
-            param.data += torch.randn_like(param) * mutation_rate
-            
-    return child
-
 
 # Evolution loop
 population = [NeuralNetwork() for _ in range(population_size)]
