@@ -1,6 +1,5 @@
-# Starter neural nets (MNIST)
+# Modus operandi
 
-- Name: Agent
-- 28*28 x 100 x 100 x 10
-- Chances to:
-  - Increase/decrease neurons
+Goal: Solve tasks by gathering several agents and performing neuroevolution with backprop
+
+1. Neural class must be highly dynamic and able to adapt for each environment
