@@ -1,3 +1,3 @@
 # logos
 
-neuroevolution (with backprop) on different tasks
+neuroevolution based on agents and environments
