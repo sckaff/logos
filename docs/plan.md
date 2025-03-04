@@ -4,6 +4,7 @@ Goal: The main.py must start a MNIST environment with 10 MNIST agents and train 
 
 ## Questions
 
+- How to combine two parents?
 - Are activation functions the only thing that gives us non-linearities in a standard FFNN?
 - Is maintenance/stability emergent or should it be implemented?
 - Sure, making the network bigger is always better, but what is the constraint/limitation for this?
