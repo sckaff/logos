@@ -12,7 +12,7 @@ ACTIVATION_FUNCTION = "tanh"  # Can be "relu", "sigmoid", "tanh", etc.
 
 # Training Settings
 SUBSET_SIZE = 1000          # Number of training samples per generation
-BATCH_SIZE = 10000          # Test batch size
+BATCH_SIZE = 640            # Test batch size
 
 # Logging & Debugging
 LOG_INTERVAL = 10           # Print results every X generations

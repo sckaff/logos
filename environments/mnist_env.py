@@ -1,72 +1,123 @@
-import torchvision.transforms as transforms
-import torchvision.datasets as datasets
-import torch.nn as nn
 import torch
-import numpy as np
-from utils import config
+import torch.optim as optim
+from torch.utils.data import DataLoader
+from torchvision import datasets, transforms
 from agents.base_agent import BaseAgent
+import utils.config as config
 
-# From base class to specified agent
-# Load MNIST dataset
-transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5,), (0.5,))])
-train_dataset = datasets.MNIST(root="./data", train=True, transform=transform, download=True)
-test_dataset = datasets.MNIST(root="./data", train=False, transform=transform, download=True)
+class MNISTEnvironment:
+    """
+    A class to manage the MNIST dataset and provide data batches.
+    """
 
-train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=config.SUBSET_SIZE, shuffle=True)
-test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=10000, shuffle=False)
+    def __init__(self, shuffle=True, download=True, data_path='./data'):
+        """
+        Initializes the MNIST environment.
 
-# Get a small subset of training data
-X_train, y_train = next(iter(train_loader))
-X_train = X_train.view(-1, 28 * 28)  # Flatten images
+        Args:
+            shuffle (bool): Whether to shuffle the data.
+            download (bool): Whether to download the dataset if it's not present.
+            data_path (str): The path to store the downloaded dataset.
+        """
+        self.shuffle = shuffle
+        self.data_path = data_path
+        self.agents = []
 
-X_test, y_test = next(iter(test_loader))
-X_test = X_test.view(-1, 28 * 28)
-# From base class to specified brain ?? Maybe.
+        # Define transformations
+        transform = transforms.Compose([
+            transforms.ToTensor(),
+            # transforms.Normalize((0.1307,), (0.3081,))
+        ])
 
+        # Load the MNIST dataset
+        self.train_dataset = datasets.MNIST(root=self.data_path, train=True, download=download, transform=transform)
+        self.test_dataset = datasets.MNIST(root=self.data_path, train=False, download=download, transform=transform)
 
-# Evolution loop
-population = [BaseAgent(config.INPUT_SIZE, config.OUTPUT_SIZE) for _ in range(config.POPULATION_SIZE)]
+        # Create DataLoaders
+        self.train_loader = DataLoader(self.train_dataset, batch_size=config.BATCH_SIZE, shuffle=self.shuffle)
+        self.test_loader = DataLoader(self.test_dataset, batch_size=config.BATCH_SIZE, shuffle=False) #test loader should not shuffle.
+        self.train_iterator = iter(self.train_loader)
+        self.test_iterator = iter(self.test_loader)
 
-# Mutation function
-def mutate(network, mutation_rate=0.05):
-    child = BaseAgent(config.INPUT_SIZE, config.OUTPUT_SIZE)
-    child.load_state_dict(network.state_dict())  # Copy weights
+    def get_train_batch(self):
+        """
+        Returns a batch of training data.
+        """
+        try:
+            return next(self.train_iterator)
+        except StopIteration:
+            self.train_iterator = iter(self.train_loader) #reset iterator at end of epoch.
+            return next(self.train_iterator)
+
+    def get_test_batch(self):
+        """
+        Returns a batch of test data.
+        """
+        try:
+            return next(self.test_iterator)
+        except StopIteration:
+            self.test_iterator = iter(self.test_loader) #reset iterator at end of epoch.
+            return next(self.test_iterator)
+
+    def get_train_loader(self):
+        """
+        Returns the train dataloader
+        """
+        return self.train_loader
+
+    def get_test_loader(self):
+        """
+        Returns the test dataloader
+        """
+        return self.test_loader
     
-    for param in child.parameters():
-        if len(param.shape) > 1:  # Only mutate weights, not biases
-            param.data += torch.randn_like(param) * mutation_rate
-            
-    return child
-for gen in range(config.GENERATIONS):
-    # Evaluate fitness
-    fitness_scores = [evaluate(nn, X_train, y_train) for nn in population]
+    def create_agent(self, name=None):
+        """
+        Creates a new agent
+        """
+        new_agent = BaseAgent(28*28, 10, name)
+
+        self.agents.append(new_agent)
+
+    def list_agents(self):
+        """
+        Lists all agents
+        """
+        for i, agent in enumerate(self.agents):
+            print("Agent #" + str(i+1) + ": " + agent.get_name())    
+
+    def train_all_agents(self, epochs=1):
+        """
+        Trains all agents in the environment.
+        """
+        for agent in self.agents:
+            print(f"Training agent: {agent.get_name()}")
+            agent.load_train_data(self.get_train_loader())
+            agent.load_test_data(self.get_test_loader())
+            agent.train(epochs)
+
+            print(f"Agent {agent.get_name()} Test Accuracy: {agent.accuracy():.4f}")
+
+    def show_average_accuracy(self):
+        """
+        Calculates and shows the average test accuracy of all agents.
+        """
+        sum_accuracy = 0
+        for agent in self.agents:
+            sum_accuracy += agent.accuracy()
+
+        print(f"Average test accuracy of all agents: {sum_accuracy/len(self.agents):.4f}")
     
-    # Select the top-k networks
-    sorted_indices = np.argsort(fitness_scores)[::-1]  # Sort by highest accuracy
-    best_networks = [population[i] for i in sorted_indices[:config.TOP_K]]
-    
-    print(f"Generation {gen+1}, Best Accuracy: {fitness_scores[sorted_indices[0]]:.4f}")
+    def show_best_agent(self):
+        """
+        Returns the agent with the highest accuracy.
+        """
+        best_acc = 0
+        best_agent = None
 
-    # Create new population: keep top-k and mutate
-    new_population = best_networks[:]
-    while len(new_population) < config.POPULATION_SIZE:
-        parent = np.random.choice(best_networks)  # Pick a random elite
-        child = mutate(parent, config.MUTATION_RATE)
-        new_population.append(child)
+        for curr_agent in self.agents:
+            if curr_agent.accuracy() > best_acc:
+                best_acc = curr_agent.accuracy()
+                best_agent = curr_agent
 
-    population = new_population  # Replace old population
-
-
-# Evaluation function (accuracy)
-def evaluate(network, X, y):
-    with torch.no_grad():
-        output = network(X)
-        predictions = torch.argmax(output, dim=1)
-        return (predictions == y).float().mean().item()
-
-
-
-# Final evaluation on test set
-best_nn = best_networks[0]
-test_accuracy = evaluate(best_nn, X_test, y_test)
-print(f"Final Test Accuracy: {test_accuracy:.4f}")
+        return best_agent

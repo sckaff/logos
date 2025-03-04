@@ -1,10 +1,10 @@
-#### HOW IT WORKS RN ####
-# - No Backpropagation: No gradient updates, just weight mutations.
-# - Selection + Mutation: Top-performing networks pass their weights to offspring.
-# - Performance Evolves: Accuracy increases over generations.
+from environments.mnist_env import MNISTEnvironment
+env = MNISTEnvironment()
 
-#### TODO ####
-# - Add crossover (combine two parents).
-# - Try different activations like ReLU.
-# - Experiment with bigger networks (more layers/neurons).
-# - Adjust mutation rate for faster evolution.
+# Create multiple agents
+for i in range(3):  # Create 3 agents for example
+    env.create_agent()
+
+env.train_all_agents()
+
+# population = [BaseAgent(config.INPUT_SIZE, config.OUTPUT_SIZE) for _ in range(config.POPULATION_SIZE)]
