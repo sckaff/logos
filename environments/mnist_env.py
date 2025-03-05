@@ -2,7 +2,7 @@ import torch
 import torch.optim as optim
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
-from agents.base_agent import BaseAgent
+from agents.agent import BaseAgent
 import utils.config as config
 
 class MNISTEnvironment:
@@ -39,26 +39,6 @@ class MNISTEnvironment:
         self.train_iterator = iter(self.train_loader)
         self.test_iterator = iter(self.test_loader)
 
-    def get_train_batch(self):
-        """
-        Returns a batch of training data.
-        """
-        try:
-            return next(self.train_iterator)
-        except StopIteration:
-            self.train_iterator = iter(self.train_loader) #reset iterator at end of epoch.
-            return next(self.train_iterator)
-
-    def get_test_batch(self):
-        """
-        Returns a batch of test data.
-        """
-        try:
-            return next(self.test_iterator)
-        except StopIteration:
-            self.test_iterator = iter(self.test_loader) #reset iterator at end of epoch.
-            return next(self.test_iterator)
-
     def get_train_loader(self):
         """
         Returns the train dataloader
@@ -94,9 +74,9 @@ class MNISTEnvironment:
             print(f"Training agent: {agent.get_name()}")
             agent.load_train_data(self.get_train_loader())
             agent.load_test_data(self.get_test_loader())
-            agent.train(epochs)
+            agent.learn(epochs)
 
-            print(f"Agent {agent.get_name()} Test Accuracy: {agent.accuracy():.4f}")
+            print(f"Agent {agent.get_name()} Test Accuracy: {agent.accuracy()}")
 
     def show_average_accuracy(self):
         """

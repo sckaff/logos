@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from faker import Faker
+from utils.utils import format_float
 
 faker = Faker()
 
@@ -26,6 +27,7 @@ class BaseAgent(nn.Module):
             self.name = name
         self.train_loader = None
         self.test_loader = None
+        self._accuracy = 0
 
     def load_train_data(self, dataloader):
         """
@@ -66,7 +68,7 @@ class BaseAgent(nn.Module):
         """
         return self.model(x)
 
-    def train_agent(self, epochs=1, lr=0.001):
+    def learn(self, epochs=1, lr=0.001):
         """
         Trains the agent's neural network.
 
@@ -81,19 +83,22 @@ class BaseAgent(nn.Module):
 
         for epoch in range(epochs):
             print(f"Agent {self.name} Epoch {epoch + 1}/{epochs}")
-            self.model.train(self.train_loader, optimizer)
+            self.model.nn_train(self.train_loader, optimizer)
 
             # Test the agent after each epoch
             test_accuracy = 0.0
             total_batches = 0
             with torch.no_grad():
                 for X, y in self.test_loader:
-                    test_accuracy += self.model.test(X, y)
+                    test_accuracy += self.model.nn_test(X, y)
                     total_batches+=1
             if total_batches > 0:
                 test_accuracy /= total_batches
 
-            print(f"Agent {self.name} Test Accuracy: {test_accuracy:.4f}")
+            self._accuracy = test_accuracy
+
+    def accuracy(self):
+        return format_float(self._accuracy)
 
 class NeuralNetwork(nn.Module):
     """
@@ -129,7 +134,7 @@ class NeuralNetwork(nn.Module):
         x = self.fc3(x)
         return x
 
-    def train(self, data_loader, optimizer, epochs = 1):
+    def nn_train(self, data_loader, optimizer, epochs = 1):
         """
         Trains the neural network.
 
@@ -139,15 +144,15 @@ class NeuralNetwork(nn.Module):
             epochs (int, optional): Number of training epochs. Defaults to 1.
         """
         self.train()
-        for epoch in range(epochs):
+        for _ in range(epochs):
             for batch_data, batch_labels in data_loader:
                 optimizer.zero_grad()
-                outputs = self.forward(batch_data)
+                outputs = self(batch_data)
                 loss = nn.CrossEntropyLoss()(outputs, batch_labels)
                 loss.backward()
                 optimizer.step()
 
-    def test(self, X, y):
+    def nn_test(self, X, y):
         """
         Tests the neural network.
 
