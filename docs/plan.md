@@ -6,6 +6,7 @@
   - Able to read NN layout
   - Probabilities to change each thing in a neural network structure
     - Those being: TBD
+- Take out all MNIST from Agent or Brain
 
 ## Questions
 

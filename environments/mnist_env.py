@@ -2,7 +2,7 @@ import torch
 import torch.optim as optim
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
-from utils import config
+from configs import MNIST
 from engine.agent import Agent
 
 class MNISTEnvironment:
@@ -34,8 +34,8 @@ class MNISTEnvironment:
         self.test_dataset = datasets.MNIST(root=self.data_path, train=False, download=download, transform=transform)
 
         # Create DataLoaders
-        self.train_loader = DataLoader(self.train_dataset, batch_size=config.BATCH_SIZE, shuffle=self.shuffle)
-        self.test_loader = DataLoader(self.test_dataset, batch_size=config.BATCH_SIZE, shuffle=False) #test loader should not shuffle.
+        self.train_loader = DataLoader(self.train_dataset, batch_size=MNIST.BATCH_SIZE, shuffle=self.shuffle)
+        self.test_loader = DataLoader(self.test_dataset, batch_size=MNIST.BATCH_SIZE, shuffle=False) #test loader should not shuffle.
         self.train_iterator = iter(self.train_loader)
         self.test_iterator = iter(self.test_loader)
 
@@ -55,7 +55,7 @@ class MNISTEnvironment:
         """
         Creates a new agent
         """
-        new_agent = Agent(config.INPUT_SIZE, config.OUTPUT_SIZE, name)
+        new_agent = Agent(MNIST.INPUT_SIZE, MNIST.OUTPUT_SIZE, name)
 
         self.agents.append(new_agent)
 
