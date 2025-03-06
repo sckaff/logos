@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from faker import Faker
-from utils.utils import format_float
+from utils.helpers import format_float
 
 faker = Faker()
 
