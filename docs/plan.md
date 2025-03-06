@@ -1,6 +1,11 @@
 # Modus operandi
 
-Current: TBD
+- Everything should be done through the environment. Meaning, agents must be controlled through the environment.
+- Add different loss functions
+- Time to implement evolution:
+  - Able to read NN layout
+  - Probabilities to change each thing in a neural network structure
+    - Those being: TBD
 
 ## Questions
 
