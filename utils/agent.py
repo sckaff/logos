@@ -1,12 +1,16 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from faker import Faker
+
+from utils import config
+from utils.brain import NeuralNetwork
 from utils.helpers import format_float
+
+from faker import Faker
 
 faker = Faker()
 
-class BaseAgent(nn.Module):
+class Agent(nn.Module):
     """
     Base class for agents with a neural network model.
     """
@@ -20,14 +24,19 @@ class BaseAgent(nn.Module):
             name (str, optional): Name of the agent. If None, a random name is generated.
         """
         super().__init__()
+        self.train_loader = None
+        self.test_loader = None
+        self.accuracy = 0
+
+        # Neuroevolution Variables
         self.model = NeuralNetwork(input_size, output_size)
         if name is None:
             self.name = faker.name()
         else:
             self.name = name
-        self.train_loader = None
-        self.test_loader = None
-        self._accuracy = 0
+        self.lr = 0.001
+        self.optimizer = optim.Adam(self.parameters(), lr=self.lr)
+
 
     def load_train_data(self, dataloader):
         """
@@ -56,6 +65,39 @@ class BaseAgent(nn.Module):
         """
         return self.name
 
+    def get_accuracy(self):
+        test_accuracy = 0.0
+        total_batches = 0
+        
+        with torch.no_grad():
+            for X, y in self.test_loader:
+                test_accuracy += self.model.nn_test(X, y)
+                total_batches+=1
+        
+        if total_batches > 0:
+            test_accuracy /= total_batches
+
+        self.accuracy = test_accuracy
+        return format_float(self.accuracy)
+    
+    def set_lr(self, lr):
+        print(f"Learning rate updated to {lr}")
+        self.lr = lr
+
+    def set_optimizer(self, optimizer, lr, alpha=0, momentum=0):
+        if optimizer not in config.OPTIMIZERS:
+            raise ValueError("Invalid Optimizer")
+        elif optimizer == "adam":
+            self.optimizer = optim.Adam(self.parameters(), lr=lr)
+        elif optimizer == "rmsprop":
+            if alpha == 0:
+                raise ValueError("Please specify alpha if optimizer = RMSProp")
+            self.optimizer = optim.RMSprop(self.parameters(), lr=0.001, alpha=0.9)
+        else:
+            if momentum == 0:
+                raise ValueError("Please specify momentum if optimizer = SGD")
+            self.optimizer = optim.SGD(self.parameters(), lr=0.01, momentum=0.9)
+
     def forward(self, x):
         """
         Performs a forward pass through the neural network.
@@ -68,7 +110,7 @@ class BaseAgent(nn.Module):
         """
         return self.model(x)
 
-    def learn(self, epochs=1, lr=0.001):
+    def learn(self, epochs=1):
         """
         Trains the agent's neural network.
 
@@ -79,93 +121,5 @@ class BaseAgent(nn.Module):
         if self.train_loader is None:
             raise ValueError("Train loader not loaded. Call load_train_data first.")
 
-        optimizer = optim.Adam(self.parameters(), lr=lr)
-
-        for epoch in range(epochs):
-            print(f"Agent {self.name} Epoch {epoch + 1}/{epochs}")
-            self.model.nn_train(self.train_loader, optimizer)
-
-            # Test the agent after each epoch
-            test_accuracy = 0.0
-            total_batches = 0
-            with torch.no_grad():
-                for X, y in self.test_loader:
-                    test_accuracy += self.model.nn_test(X, y)
-                    total_batches+=1
-            if total_batches > 0:
-                test_accuracy /= total_batches
-
-            self._accuracy = test_accuracy
-
-    def accuracy(self):
-        return format_float(self._accuracy)
-
-class NeuralNetwork(nn.Module):
-    """
-    A simple neural network with three fully connected layers.
-    """
-    def __init__(self, input_size, output_size):
-        """
-        Initializes the NeuralNetwork.
-
-        Args:
-            input_size (int): Size of the input layer.
-            output_size (int): Size of the output layer.
-        """
-        super().__init__()
-        self.fc1 = nn.Linear(input_size, 100)
-        self.fc2 = nn.Linear(100, 200)
-        self.fc3 = nn.Linear(200, output_size)
-        self.relu = nn.ReLU()
-
-    def forward(self, x):
-        """
-        Performs a forward pass through the neural network.
-
-        Args:
-            x (torch.Tensor): Input tensor.
-
-        Returns:
-            torch.Tensor: Output tensor.
-        """
-        x = x.view(x.size(0), -1) #Flatten the input.
-        x = self.relu(self.fc1(x))
-        x = self.relu(self.fc2(x))
-        x = self.fc3(x)
-        return x
-
-    def nn_train(self, data_loader, optimizer, epochs = 1):
-        """
-        Trains the neural network.
-
-        Args:
-            data_loader (torch.utils.data.DataLoader): Training data loader.
-            optimizer (torch.optim.Optimizer): Optimizer for training.
-            epochs (int, optional): Number of training epochs. Defaults to 1.
-        """
-        self.train()
-        for _ in range(epochs):
-            for batch_data, batch_labels in data_loader:
-                optimizer.zero_grad()
-                outputs = self(batch_data)
-                loss = nn.CrossEntropyLoss()(outputs, batch_labels)
-                loss.backward()
-                optimizer.step()
-
-    def nn_test(self, X, y):
-        """
-        Tests the neural network.
-
-        Args:
-            X (torch.Tensor): Input tensor.
-            y (torch.Tensor): Target tensor.
-
-        Returns:
-            float: Average accuracy of the predictions.
-        """
-        self.eval()
-        with torch.no_grad():
-            X = X.view(X.size(0), -1)
-            output = self.forward(X)
-            predictions = torch.argmax(output, dim=1)
-            return (predictions == y).float().mean().item()
+        self.set_optimizer("adam", self.lr)
+        self.model.nn_train(self.train_loader, self.optimizer, epochs)

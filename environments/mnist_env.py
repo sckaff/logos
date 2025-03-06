@@ -3,7 +3,7 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 from utils import config
-from utils.agent import BaseAgent
+from utils.agent import Agent
 
 class MNISTEnvironment:
     """
@@ -55,7 +55,7 @@ class MNISTEnvironment:
         """
         Creates a new agent
         """
-        new_agent = BaseAgent(28*28, 10, name)
+        new_agent = Agent(config.INPUT_SIZE, config.OUTPUT_SIZE, name)
 
         self.agents.append(new_agent)
 
@@ -76,7 +76,7 @@ class MNISTEnvironment:
             agent.load_test_data(self.get_test_loader())
             agent.learn(epochs)
 
-            print(f"Agent {agent.get_name()} Test Accuracy: {agent.accuracy()}")
+            print(f"Agent {agent.get_name()} Test Accuracy: {agent.get_accuracy()}")
 
     def show_average_accuracy(self):
         """
