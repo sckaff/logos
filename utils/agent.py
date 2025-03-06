@@ -98,18 +98,6 @@ class Agent(nn.Module):
                 raise ValueError("Please specify momentum if optimizer = SGD")
             self.optimizer = optim.SGD(self.parameters(), lr=0.01, momentum=0.9)
 
-    def forward(self, x):
-        """
-        Performs a forward pass through the neural network.
-
-        Args:
-            x (torch.Tensor): Input tensor.
-
-        Returns:
-            torch.Tensor: Output tensor.
-        """
-        return self.model(x)
-
     def learn(self, epochs=1):
         """
         Trains the agent's neural network.

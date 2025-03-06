@@ -71,12 +71,13 @@ class MNISTEnvironment:
         Trains all agents in the environment.
         """
         for agent in self.agents:
-            print(f"Training agent: {agent.get_name()}")
+            print(f"\nTraining agent: {agent.get_name()}")
             agent.load_train_data(self.get_train_loader())
             agent.load_test_data(self.get_test_loader())
             agent.learn(epochs)
 
             print(f"Agent {agent.get_name()} Test Accuracy: {agent.get_accuracy()}")
+            print("\n#-------------------#")
 
     def show_average_accuracy(self):
         """
