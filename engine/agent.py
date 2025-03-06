@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.optim as optim
 
 from utils import config
-from utils.brain import NeuralNetwork
+from engine.brain import NeuralNetwork
 from utils.helpers import format_float
 
 from faker import Faker
@@ -75,7 +75,7 @@ class Agent(nn.Module):
                 total_batches+=1
         
         if total_batches > 0:
-            test_accuracy /= total_batches
+            test_accuracy /= total_batches  
 
         self.accuracy = test_accuracy
         return format_float(self.accuracy)
