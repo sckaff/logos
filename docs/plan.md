@@ -6,6 +6,8 @@
   - Able to read NN layout
   - Probabilities to change each thing in a neural network structure
     - Those being: TBD
+- Create test cases
+- Training is taking way too long
 
 ## Questions
 
