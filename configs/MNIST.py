@@ -9,15 +9,6 @@ INPUT_SIZE = 28 * 28        # MNIST image size (flattened)
 HIDDEN_SIZE = 32            # Hidden layer neurons
 OUTPUT_SIZE = 10            # Output classes (digits 0-9)
 
-
 # Training Settings
 SUBSET_SIZE = 1000          # Number of training samples per generation
 BATCH_SIZE = 10000            # Test batch size
-
-# Logging & Debugging
-LOG_INTERVAL = 10           # Print results every X generations
-SAVE_RESULTS = True         # Whether to save progress to a file
-
-# Optimizers (there is a better way to do this)
-OPTIMIZERS = ["adam", "rmsprop", "sgd"]
-ACTIVATION_FUNCTIONS = ["tanh", "relu", "sigmoid"]

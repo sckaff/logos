@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
-from configs import MNIST
+from configs import general
 from engine.brain import NeuralNetwork
 from utils.helpers import format_float
 
@@ -85,7 +85,7 @@ class Agent(nn.Module):
         self.lr = lr
 
     def set_optimizer(self, optimizer, lr, alpha=0, momentum=0):
-        if optimizer not in MNIST.OPTIMIZERS:
+        if optimizer not in general.OPTIMIZERS:
             raise ValueError("Invalid Optimizer")
         elif optimizer == "adam":
             self.optimizer = optim.Adam(self.parameters(), lr=lr)
