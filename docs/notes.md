@@ -20,17 +20,10 @@
 - Increase/decrease neurons in a layer
 - Increase/decrease layer
 
-### OBS
-
-- Show initial state/best model
-- Figure out good encoding mech
-  - For initial state?
-  - Including weights file with it
-
 ## Notes
 
-- Swarm intelligence? Agents each w/ differennt purposes
-- Think of debbuging whenn creating vizualization
+- Swarm intelligence? Agents each w/ different purposes
+- Think of debbuging when creating vizualization
 - Fully-connected network foor each input
   - "Areas of the brain"
   - Better than auxiliary networks?
@@ -38,8 +31,8 @@
 - Create more neurons in saturated areas
 - Reproduce b/w species?
 - Softmax is always used
-- Ability too create new input?
-  - Like creating new organns
+- Ability to create new input?
+  - Like creating new organs
   - Ideally we want to evolve towards that (new input)
 - Encoder = Genotype | Decoder = Phenotype
 - String-matching genes is also more efficient
@@ -48,12 +41,6 @@
   - If adding new noe, fully connected
   - When to change structure and when to change weights
 - "Cap value" to avoid overfitting (?)
-
-### Choices
-
-- Do not use libs
-- Standard weight init?
-- No biases?
 
 ## Takeaways
 
