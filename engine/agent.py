@@ -11,18 +11,7 @@ from faker import Faker
 faker = Faker()
 
 class Agent(nn.Module):
-    """
-    Base class for agents with a neural network model.
-    """
     def __init__(self, input_size, output_size, name=None):
-        """
-        Initializes the BaseAgent.
-
-        Args:
-            input_size (int): Size of the input layer.
-            output_size (int): Size of the output layer.
-            name (str, optional): Name of the agent. If None, a random name is generated.
-        """
         super().__init__()
         self.train_loader = None
         self.test_loader = None
@@ -39,30 +28,12 @@ class Agent(nn.Module):
 
 
     def load_train_data(self, dataloader):
-        """
-        Loads the training data loader.
-
-        Args:
-            dataloader (torch.utils.data.DataLoader): Training data loader.
-        """
         self.train_loader = dataloader
 
     def load_test_data(self, dataloader):
-        """
-        Loads the test data loader.
-
-        Args:
-            dataloader (torch.utils.data.DataLoader): Test data loader.
-        """
         self.test_loader = dataloader
 
     def get_name(self):
-        """
-        Returns the name of the agent.
-
-        Returns:
-            str: Agent's name.
-        """
         return self.name
 
     def get_accuracy(self):
@@ -99,13 +70,6 @@ class Agent(nn.Module):
             self.optimizer = optim.SGD(self.parameters(), lr=0.01, momentum=0.9)
 
     def learn(self, epochs=1):
-        """
-        Trains the agent's neural network.
-
-        Args:
-            epochs (int, optional): Number of training epochs. Defaults to 1.
-            lr (float, optional): Learning rate for the optimizer. Defaults to 0.001.
-        """
         if self.train_loader is None:
             raise ValueError("Train loader not loaded. Call load_train_data first.")
 

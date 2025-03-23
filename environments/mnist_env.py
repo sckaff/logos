@@ -4,19 +4,7 @@ from configs import MNIST
 from engine.agent import Agent
 
 class MNISTEnvironment:
-    """
-    A class to manage the MNIST dataset and provide data batches.
-    """
-
     def __init__(self, shuffle=True, download=True, data_path='./data'):
-        """
-        Initializes the MNIST environment.
-
-        Args:
-            shuffle (bool): Whether to shuffle the data.
-            download (bool): Whether to download the dataset if it's not present.
-            data_path (str): The path to store the downloaded dataset.
-        """
         self.shuffle = shuffle
         self.data_path = data_path
         self.agents = []
@@ -38,36 +26,21 @@ class MNISTEnvironment:
         self.test_iterator = iter(self.test_loader)
 
     def get_train_loader(self):
-        """
-        Returns the train dataloader
-        """
         return self.train_loader
 
     def get_test_loader(self):
-        """
-        Returns the test dataloader
-        """
         return self.test_loader
     
     def create_agent(self, name=None):
-        """
-        Creates a new agent
-        """
         new_agent = Agent(MNIST.INPUT_SIZE, MNIST.OUTPUT_SIZE, name)
 
         self.agents.append(new_agent)
 
     def list_agents(self):
-        """
-        Lists all agents
-        """
         for i, agent in enumerate(self.agents):
             print("Agent #" + str(i+1) + ": " + agent.get_name())    
 
     def train_all_agents(self, epochs=1):
-        """
-        Trains all agents in the environment.
-        """
         for agent in self.agents:
             print(f"\nTraining agent: {agent.get_name()}")
             agent.load_train_data(self.get_train_loader())
@@ -78,9 +51,6 @@ class MNISTEnvironment:
             print("\n#-------------------#")
 
     def show_average_accuracy(self):
-        """
-        Calculates and shows the average test accuracy of all agents.
-        """
         sum_accuracy = 0
         for agent in self.agents:
             sum_accuracy += agent.accuracy()
@@ -88,9 +58,6 @@ class MNISTEnvironment:
         print(f"Average test accuracy of all agents: {sum_accuracy/len(self.agents):.4f}")
     
     def show_best_agent(self):
-        """
-        Returns the agent with the highest accuracy.
-        """
         best_acc = 0
         best_agent = None
 
